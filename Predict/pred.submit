@@ -1,0 +1,26 @@
+universe = docker
+docker_image = krisrs1128/lakes:071305
+log = /home/mzheng54/Processed/pred_gpu/log/job_$(Cluster).log
+error = /home/mzheng54/Processed/pred_gpu/log/job_$(Cluster).err
+output = /home/mzheng54/Processed/pred_gpu/log/job_$(Cluster).out
+
+transfer_input_files = /staging/mzheng54/test.tar.gz,/home/mzheng54/Processed/train_gpu/model.pt 
+
+
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+
+executable = pred.sh
+request_cpus = 1
+request_gpus = 1
++WantGPULab = true
++GPUJobLength = "short"
+
+request_memory = 24GB
+request_disk = 64GB
+
+queue 1
+
+
+
+
