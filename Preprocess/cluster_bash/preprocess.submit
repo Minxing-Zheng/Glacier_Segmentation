@@ -1,0 +1,12 @@
+universe = docker
+docker_image = krisrs1128/mappingvis:031001
+log = /home/mzheng54/Processed/preprocess/log/$(Process).log
+error = /home/mzheng54/Processed/preprocess/log/$(Process).err
+output = /home/mzheng54/Processed/preprocess/log/$(Process).out
+transfer_input_files = preprocess.sh, preprocess.submit
+executable = preprocess.sh
+environment = "B=$(Process)"
+request_cpus = 1
+request_memory = 4GB
+request_disk = 2GB
+queue 1

@@ -1,0 +1,77 @@
+---
+title: "Data Preparation"
+params:
+  out_dir: "out_process"
+  x_path: "/vsicurl/https://glaciersblob.blob.core.windows.net/glaciersdata-kris/hkh.vrt"
+  y_path: "https://uwmadison.box.com/shared/static/xmao8ovibuuqy71nezveylb35ugpq2fo.geojson"
+  basins: "https://uwmadison.box.com/shared/static/jkbnl83wbv6fon923qcmkpnn6jvon1og.csv" #full list of training basins
+  #basins: "https://uwmadison.box.com/shared/static/edr6a9oerybdksrl9r9msw16axusijqx.csv" # full list for testing basins
+  n_patches: 100
+  B: 1 
+---
+#add a parameter to indicate the test_preprocess and train_preprocess
+
+```{r setup, include=FALSE}
+rm(list=setdiff(ls(), "params"))
+knitr::opts_chunk$set(echo = TRUE, cache = FALSE, message = FALSE, warning = FALSE)
+```
+
+```{r}
+library("RStoolbox")
+library("abind")
+library("dplyr")
+library("gdalUtils")
+library("ggplot2")
+library("gridExtra")
+library("purrr")
+library("raster")
+library("readr")
+library("reticulate")
+library("sf")
+library("stringr")
+library("tidyr")
+# setting up python environment
+use_condaenv("mappingvis")
+np <- import("numpy")
+source("data.R")
+theme_set(theme_minimal())
+set.seed(params$B)
+```
+
+Read geojson.
+
+```{r}
+y_path <- file.path(params$y_path)
+basins <- read_csv(params$basins)
+y <- read_sf(y_path) %>%
+  filter(Sub_basin %in% basins$Sub_basin)
+y<-y[!st_is_empty(y),]
+W_valid<-st_is_valid(y)
+y<-y[-c(which(!W_valid)),]
+
+#y<-y[-4343,]# for test basins
+#y<-y[-18729,]#geometry!="MULTIPOLYGON EMPTY" for train basins
+```
+
+Get sampling locations.
+
+```{r}
+centers <- y %>%
+  st_sample(params$n_patches, type = "random", by_polygon = FALSE) %>%
+  st_coordinates()
+colnames(centers) <- c("Longitude", "Latitude")
+```
+
+```{r}
+vrt_path <- file.path(params$x_path)
+y <- y%>%mutate(Glaciers = factor(Glaciers, levels = c("Clean Ice", "Debris covered")))
+ys <- y %>% split(.$Glaciers)
+
+```
+
+```{r}
+write_patches(vrt_path, ys, centers,params$out_dir,params$B)
+centers<-cbind(centers,c(1:params$n_patches))
+colnames(centers)<-c("Longitude","Latitude","ID")
+write.csv(centers,file.path(params$out_dir, paste0("centers-", params$B, ".csv")))
+```
