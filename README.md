@@ -1,4 +1,4 @@
-# Glacier_Segmentation [arxiv](https://arxiv.org/pdf/2112.08184.pdf)
+# Glacier_Segmentation [[arxiv](https://arxiv.org/pdf/2112.08184.pdf)]
 
 This is the repo for the glaicer segmentation project which is advised by [Prof. Kris Sankaran](https://stat.wisc.edu/staff/sankaran-kris/) at UW Madison.
 
